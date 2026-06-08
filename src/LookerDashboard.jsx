@@ -1349,6 +1349,12 @@ export default function App() {
             background: t.success, marginRight: 6, verticalAlign: "middle" }} />
           Live · Google Sheets backend, auto-refresh every 5 min.
         </div>
+         <div style={{ padding: 13, borderRadius: 12, background: t.hover,
+          fontSize: 11.5, color: t.sub, lineHeight: 1.5 }}>
+          <span style={{ display: "inline-flex", width: 7, height: 7, borderRadius: "50%",
+            background: t.success, marginRight: 6, verticalAlign: "middle" }} />
+          Copyright © 2026 Shivam Sengar & Krishna Dev. All Rights Reserved.
+        </div>
       </aside>
       {sidebar && <div onClick={() => setSidebar(false)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,.45)", backdropFilter: "blur(2px)", zIndex: 55 }} />}
 
