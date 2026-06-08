@@ -14,11 +14,12 @@ import {
 } from "lucide-react";
 
 /* ----------------------------------------------------------------
-   BACKEND — Google Apps Script via Vite proxy (/api)
-   The proxy is configured in vite.config.js to forward /api to the
-   Apps Script /exec URL. This avoids CORS errors in development.
+   BACKEND — Google Apps Script
+   Local dev: VITE_API_URL = "/api" (Vite proxy handles CORS)
+   Production: VITE_API_URL = the Apps Script /exec URL (direct call)
+   Falls back to "/api" if no env var is set.
 ----------------------------------------------------------------- */
-const API_URL = "/api";
+const API_URL = import.meta.env.VITE_API_URL || "/api";
 
 async function api(action, payload = {}) {
   try {
@@ -218,7 +219,7 @@ function KpiCard({ t, icon: Icon, label, value, growth, spark, delay, valueColor
         </div>
       </div>
       <div style={{ display: "flex", alignItems: "baseline", gap: 9 }}>
-        <div style={{ fontSize: 28, fontWeight: 700, color: valueColor || t.text, letterSpacing: "-.8px", lineHeight: 1 }}>{value}</div>
+        <div className="lk-kpi-val" style={{ fontSize: "clamp(20px, 5vw, 28px)", fontWeight: 700, color: valueColor || t.text, letterSpacing: "-.8px", lineHeight: 1.05, wordBreak: "break-word", minWidth: 0 }}>{value}</div>
         {ragLabel && (
           <span style={{ padding: "2px 9px", borderRadius: 20, fontSize: 10.5, fontWeight: 700,
             background: scoreBg(parseFloat(value)), color: valueColor }}>{ragLabel}</span>
@@ -1269,7 +1270,8 @@ export default function App() {
   );
 
   return (
-    <div style={{ display: "flex", minHeight: "100vh", background: t.bg, color: t.text,
+    <div style={{ display: "flex", minHeight: "100vh", width: "100%", maxWidth: "100vw", overflowX: "hidden",
+      background: t.bg, color: t.text,
       fontFamily: "'Inter','Google Sans','Segoe UI',Roboto,system-ui,sans-serif",
       transition: "background .35s cubic-bezier(.4,0,.2,1)", WebkitFontSmoothing: "antialiased" }}>
       <style>{`
@@ -1278,7 +1280,7 @@ export default function App() {
         @keyframes fadeIn{from{opacity:0}to{opacity:1}}
         @keyframes shimmer{0%{background-position:-400px 0}100%{background-position:400px 0}}
         *{box-sizing:border-box}
-        body{margin:0}
+        html,body,#root{margin:0;padding:0;width:100%;max-width:100%;overflow-x:hidden}
         input,button{font-family:inherit}
         button{transition:background .2s ease,color .2s ease,transform .12s ease,box-shadow .2s ease,opacity .2s ease}
         button:active{transform:scale(.97)}
@@ -1297,17 +1299,29 @@ export default function App() {
         .lk-row{transition:background .15s ease}
         .lk-mobtog{display:none}
         @media(max-width:860px){.lk-sidebar{position:fixed!important;z-index:60;height:100%;transform:translateX(-110%);transition:transform .32s cubic-bezier(.4,0,.2,1)}.lk-sidebar.open{transform:none}.lk-desk{display:none!important}.lk-mobtog{display:block!important}}
-        @media(max-width:640px){
-          .lk-kpis{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))!important;gap:10px!important}
-          .lk-main{padding:12px 14px 22px!important}
-          .lk-titlebar{padding:16px 14px 4px!important}
-          .lk-header{padding:11px 14px!important;gap:10px!important}
-          .lk-search{max-width:100%!important}
-          table{font-size:12px!important}
-          h1{font-size:18px!important}
+        /* Tablet */
+        @media(max-width:900px){
+          .lk-kpis{grid-template-columns:repeat(auto-fill,minmax(180px,1fr))!important}
+          .lk-main{padding:16px 18px 24px!important}
+          .lk-titlebar{padding:18px 18px 4px!important}
         }
-        @media(max-width:420px){
-          .lk-kpis{grid-template-columns:1fr 1fr!important}
+        /* Mobile */
+        @media(max-width:640px){
+          .lk-kpis{grid-template-columns:1fr 1fr!important;gap:10px!important}
+          .lk-main{padding:12px 12px 22px!important;gap:14px!important}
+          .lk-titlebar{padding:14px 12px 4px!important;gap:10px!important}
+          .lk-header{padding:11px 12px!important;gap:8px!important}
+          .lk-search{max-width:100%!important;flex:1 1 100%!important;order:5}
+          .lk-filters{width:100%!important}
+          .lk-filters > *{flex:1 1 auto!important}
+          table{font-size:12px!important}
+          th,td{padding:9px 8px!important;white-space:nowrap}
+          h1{font-size:18px!important}
+          .lk-export-label{display:none!important}
+        }
+        /* Small phones */
+        @media(max-width:380px){
+          .lk-kpis{grid-template-columns:1fr!important}
         }
       `}</style>
 
@@ -1349,12 +1363,6 @@ export default function App() {
             background: t.success, marginRight: 6, verticalAlign: "middle" }} />
           Live · Google Sheets backend, auto-refresh every 5 min.
         </div>
-         <div style={{ padding: 13, borderRadius: 12, background: t.hover,
-          fontSize: 11.5, color: t.sub, lineHeight: 1.5 }}>
-          <span style={{ display: "inline-flex", width: 7, height: 7, borderRadius: "50%",
-            background: t.success, marginRight: 6, verticalAlign: "middle" }} />
-          Copyright © 2026 Shivam Sengar & Krishna Dev. All Rights Reserved.
-        </div>
       </aside>
       {sidebar && <div onClick={() => setSidebar(false)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,.45)", backdropFilter: "blur(2px)", zIndex: 55 }} />}
 
@@ -1381,7 +1389,7 @@ export default function App() {
               <button onClick={() => setReportOpen(!reportOpen)} style={{ display: "flex", alignItems: "center", gap: 7,
                 padding: "8px 14px", borderRadius: 22, border: `1px solid ${t.border}`,
                 background: t.card, color: t.text, fontSize: 13, fontWeight: 500, cursor: "pointer" }}>
-                <Download size={15} /> Export Report
+                <Download size={15} /> <span className="lk-export-label">Export Report</span>
                 <ChevronDown size={14} style={{ transform: reportOpen ? "rotate(180deg)" : "none", transition: ".2s" }} />
               </button>
               {reportOpen && (
@@ -1496,7 +1504,7 @@ export default function App() {
               Welcome back, {user.fullName.split(" ")[0]} · {kpis.records ? fmt(kpis.records) : 0} records in view
             </p>
           </div>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 10, alignItems: "center" }}>
+          <div className="lk-filters" style={{ display: "flex", flexWrap: "wrap", gap: 10, alignItems: "center" }}>
             <span style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, color: t.sub, fontWeight: 500 }}>
               <Filter size={15} /> Filters
             </span>
