@@ -553,17 +553,26 @@ function LoginPage({ onLogin }) {
   const strengthColor = ["#EA4335", "#EA4335", "#FBBC04", "#34A853", "#1E8E3E"][strength];
 
   return (
-    <div style={{ minHeight: "100vh", display: "grid", placeItems: "center",
+    <div style={{ minHeight: "100vh", display: "flex",
       fontFamily: "'Inter','Google Sans','Segoe UI',Roboto,system-ui,sans-serif",
-      background: "radial-gradient(1200px 600px at 50% -10%, #E8F0FE 0%, #F5F6F8 45%, #E6F4EA 100%)",
-      padding: 20, WebkitFontSmoothing: "antialiased" }}>
+      WebkitFontSmoothing: "antialiased", overflow: "hidden" }}>
       <style>{`@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
         @keyframes rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
         @keyframes spin{to{transform:rotate(360deg)}}
+        @keyframes floatBlob{0%,100%{transform:translate(0,0) scale(1)}33%{transform:translate(40px,-30px) scale(1.1)}66%{transform:translate(-30px,20px) scale(.95)}}
+        @keyframes gridMove{from{background-position:0 0}to{background-position:48px 48px}}
         .lk-login input{transition:border-color .2s, box-shadow .2s}
         .lk-login input:focus{outline:none;border-color:#1A73E8!important;box-shadow:0 0 0 3px rgba(26,115,232,.2)!important}
         .lk-login button{transition:transform .12s, background .2s, box-shadow .2s}
-        .lk-login button:active{transform:scale(.98)}`}</style>
+        .lk-login button:active{transform:scale(.98)}
+        .lk-auth-brand{position:relative;flex:1;display:flex;flex-direction:column;justify-content:space-between;
+          padding:54px 48px;overflow:hidden;
+          background:linear-gradient(135deg,#1A73E8 0%,#1557B0 50%,#0B3D91 100%)}
+        .lk-auth-right{flex:1;display:grid;place-items:center;padding:24px;
+          background:radial-gradient(1200px 600px at 50% -10%, #E8F0FE 0%, #F5F6F8 45%, #E6F4EA 100%)}
+        .lk-blob{position:absolute;border-radius:50%;filter:blur(40px);opacity:.5;animation:floatBlob 14s ease-in-out infinite}
+        @media(max-width:880px){.lk-auth-brand{display:none}}
+      `}</style>
 
       {toast && (
         <div style={{ position: "fixed", top: 22, left: "50%", transform: "translateX(-50%)",
@@ -574,6 +583,43 @@ function LoginPage({ onLogin }) {
         </div>
       )}
 
+      {/* LEFT — animated brand panel */}
+      <div className="lk-auth-brand">
+        <div className="lk-blob" style={{ width: 320, height: 320, top: -60, right: -40, background: "#8AB4F8" }} />
+        <div className="lk-blob" style={{ width: 260, height: 260, bottom: -40, left: -30, background: "#34A853", animationDelay: "3s" }} />
+        <div style={{ position: "absolute", inset: 0, opacity: .12,
+          backgroundImage: "linear-gradient(rgba(255,255,255,.4) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.4) 1px,transparent 1px)",
+          backgroundSize: "48px 48px", animation: "gridMove 8s linear infinite" }} />
+        <div style={{ position: "relative", display: "flex", alignItems: "center", gap: 12 }}>
+          <div style={{ width: 44, height: 44, borderRadius: 12, background: "rgba(255,255,255,.18)",
+            backdropFilter: "blur(8px)", display: "grid", placeItems: "center" }}>
+            <LayoutDashboard size={24} color="#fff" />
+          </div>
+          <span style={{ color: "#fff", fontWeight: 700, fontSize: 20, letterSpacing: "-.4px" }}>Looker Studio</span>
+        </div>
+        <div style={{ position: "relative" }}>
+          <h1 style={{ color: "#fff", fontSize: 34, fontWeight: 800, lineHeight: 1.15, margin: "0 0 16px", letterSpacing: "-1px" }}>
+            Performance analytics,<br />beautifully simple.
+          </h1>
+          <p style={{ color: "rgba(255,255,255,.85)", fontSize: 15, lineHeight: 1.6, margin: 0, maxWidth: 420 }}>
+            Track scores, departments, and trends in real time — powered by your Google Sheets, presented like a premium SaaS dashboard.
+          </p>
+          <div style={{ display: "flex", gap: 22, marginTop: 32 }}>
+            {[["Live", "Auto-refresh"], ["RAG", "Smart scoring"], ["Secure", "Role-based access"]].map(([a, b]) => (
+              <div key={a}>
+                <div style={{ color: "#fff", fontWeight: 700, fontSize: 18 }}>{a}</div>
+                <div style={{ color: "rgba(255,255,255,.7)", fontSize: 12 }}>{b}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+        <div style={{ position: "relative", color: "rgba(255,255,255,.6)", fontSize: 12 }}>
+          © {new Date().getFullYear()} Looker Studio · Built on Google Sheets
+        </div>
+      </div>
+
+      {/* RIGHT — auth card */}
+      <div className="lk-auth-right">
       <div className="lk-login" style={{ width: "100%", maxWidth: 420, background: "#fff", borderRadius: 20,
         border: `1px solid ${t.border}`, boxShadow: "0 24px 60px rgba(60,64,67,.16), 0 4px 16px rgba(60,64,67,.08)",
         padding: "36px 34px", animation: "rise .45s cubic-bezier(.4,0,.2,1) both" }}>
@@ -725,6 +771,7 @@ function LoginPage({ onLogin }) {
             </p>
           </>
         )}
+      </div>
       </div>
     </div>
   );
@@ -1318,6 +1365,7 @@ export default function App() {
           th,td{padding:9px 8px!important;white-space:nowrap}
           h1{font-size:18px!important}
           .lk-export-label{display:none!important}
+          .lk-dropdown{position:fixed!important;top:64px!important;left:50%!important;right:auto!important;transform:translateX(-50%)!important;width:92vw!important;max-width:360px!important;max-height:75vh!important;overflow-y:auto!important}
         }
         /* Small phones */
         @media(max-width:380px){
@@ -1395,7 +1443,7 @@ export default function App() {
               {reportOpen && (
                 <>
                   <div onClick={() => setReportOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 59 }} />
-                  <div style={{ position: "absolute", right: 0, top: "calc(100% + 10px)", width: 270,
+                  <div className="lk-dropdown" style={{ position: "absolute", right: 0, top: "calc(100% + 10px)", width: 270,
                     background: t.card, border: `1px solid ${t.border}`, borderRadius: 12, zIndex: 61,
                     boxShadow: "0 10px 32px rgba(60,64,67,.22)", overflow: "hidden", animation: "rise .15s both" }}>
                     <div style={{ padding: "11px 16px", borderBottom: `1px solid ${t.border}`, fontWeight: 600,
@@ -1431,7 +1479,7 @@ export default function App() {
               {notifOpen && (
                 <>
                   <div onClick={() => setNotifOpen(false)} style={{ position: "fixed", inset: 0, zIndex: 59 }} />
-                <div style={{ position: "absolute", right: 0, top: "calc(100% + 10px)", width: 300,
+                <div className="lk-dropdown" style={{ position: "absolute", right: 0, top: "calc(100% + 10px)", width: 300,
                   background: t.card, border: `1px solid ${t.border}`, borderRadius: 12, zIndex: 60,
                   boxShadow: "0 8px 28px rgba(60,64,67,.22)", overflow: "hidden", animation: "rise .15s both" }}>
                   <div style={{ padding: "12px 16px", borderBottom: `1px solid ${t.border}`, fontWeight: 600, fontSize: 14 }}>Notifications</div>
